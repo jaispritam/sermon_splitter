@@ -163,7 +163,8 @@ class VideoProcessor:
         proc = subprocess.Popen([self.ffmpeg.ffmpeg_path, *ff_cmd], stdin=subprocess.PIPE)
         
         frame_index = 0
-        aspect_ratio = out_h / out_w
+        aspect_ratio = out_w / out_h
+        smooth_x = None
         with detector:
             if not video.isOpened:
                 print("Couldn't Open the video File")
@@ -175,12 +176,11 @@ class VideoProcessor:
                 crop_w = int(h * (aspect_ratio))
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 mp_image = mp.Image(image_format=mp.ImageFormat.SRGB,data=rgb_frame)
-                timestamp = int((frame_index * 1000)/fps)
+                timestamp = int((frame_index) * 1000/fps)
                 frame_index += 1
-                smooth_x = None
+                
                 #Detecting Faces
                 detection_result = detector.detect_for_video(mp_image, timestamp)
-                
                 #Cropping the Video
                 center_x = w // 2
                 if detection_result.detections:
@@ -188,18 +188,21 @@ class VideoProcessor:
                     bbox = detection_result.detections[0].bounding_box
                     # Get the Horizontal Middle/Center of the Bounding Box
                     center_x = int(bbox.origin_x + (bbox.width /2))
+                    
+                    #Smoothing Out the Video
                     if smooth_x is None:
-                        smooth_x = center_x
+                        smooth_x = float(center_x)
                     else:
-                        if abs(smooth_x - center_x) > JITTER_THRESHOLD:
+                        if abs(center_x -smooth_x) > JITTER_THRESHOLD:
                             smooth_x = smooth_x + (center_x - smooth_x)*smooth
-                
                 #Calculating crop Boundaries
-                x_start = max(0, min(center_x - (crop_w //2),w- crop_w))
+                smooth_x = int(smooth_x)
+                x_start = max(0, min(smooth_x - (crop_w //2),w- crop_w))
                 x_end = x_start + crop_w
                 
                 cropped_frame = frame[0:h, x_start:x_end]
-                cropped_frame = cv2.resize(cropped_frame, (out_w, out_h))
+                cropped_frame = cv2.resize(cropped_frame,(out_w,out_h))
+                
                 # Uncomment below to see preview of the Face Tracking
                 # cv2.imshow('Vertical Face Follow',cropped_frame)
                 # if cv2.waitKey(1) & 0xFF == ord('q'): break
@@ -244,6 +247,7 @@ class VideoProcessor:
             "-movflags", "+faststart",
             str(out_path)
         ]
+               
         self.ffmpeg.run_command(args)
 
         # Cleanup: Remove the temporary SRT file from CWD
