@@ -21,7 +21,7 @@ import shutil
 # ---------- Config (tweakable) ----------
 OUT_W, OUT_H = 1080, 1920
 SMOOTH = 0.98
-JITTER_THRESHOLD = 10  # jitter threshold in pixels
+JITTER_THRESHOLD = 1.6  # jitter threshold in pixels
 
 
 def download_video(url: str) -> Path:
@@ -247,7 +247,7 @@ class VideoProcessor:
             "-movflags", "+faststart",
             str(out_path)
         ]
-               
+
         self.ffmpeg.run_command(args)
 
         # Cleanup: Remove the temporary SRT file from CWD
