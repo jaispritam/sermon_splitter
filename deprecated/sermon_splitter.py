@@ -199,7 +199,7 @@ class VideoProcessor:
                 x_end = x_start + crop_w
                 
                 cropped_frame = frame[0:h, x_start:x_end]
-                
+                cropped_frame = cv2.resize(cropped_frame, (out_w, out_h))
                 # Uncomment below to see preview of the Face Tracking
                 # cv2.imshow('Vertical Face Follow',cropped_frame)
                 # if cv2.waitKey(1) & 0xFF == ord('q'): break
