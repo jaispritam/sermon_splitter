@@ -5,7 +5,6 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-import time
 import srt as srtlib
 from datetime import timedelta
 from pytubefix import YouTube
