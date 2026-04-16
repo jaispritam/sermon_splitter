@@ -1,11 +1,15 @@
-import streamlit as st
-from sermon_splitter import SermonSplitterApp, VideoUtils, download_video
 from pathlib import Path
+
+import streamlit as st
+
+from backend.pipeline.sermon_pipeline import SermonPipeline
+from backend.video.downloader import download_video
 
 
 @st.cache_data
 def download_video_cached(url: str):
     return download_video(url)
+
 
 st.title("Sermon Splitter")
 
@@ -55,9 +59,9 @@ if source_video_path:
         else:
             try:
                 with st.spinner("Processing video... This may take a while."):
-                    app = SermonSplitterApp(source_path=str(source_video_path))
+                    app = SermonPipeline(source_path=str(source_video_path))
                     final_output_path = app.run(num_clips, clips_data, output_filename)
-                    st.success(f"Video processing complete!")
+                    st.success("Video processing complete!")
                     st.info(f"Output file: {final_output_path}")
 
                     with open(final_output_path, "rb") as f:
@@ -65,7 +69,7 @@ if source_video_path:
                             label="Download Processed Video",
                             data=f,
                             file_name=Path(final_output_path).name,
-                            mime="video/mp4"
+                            mime="video/mp4",
                         )
 
             except Exception as e:

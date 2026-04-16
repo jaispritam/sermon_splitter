@@ -1,5 +1,7 @@
 from pathlib import Path
-from sermon_splitter import SermonSplitterApp
+
+from backend.pipeline.sermon_pipeline import SermonPipeline
+
 
 if __name__ == "__main__":
     # The user must have a video file at this path for the script to work.
@@ -13,7 +15,7 @@ if __name__ == "__main__":
         print(f"Error: Video file not found at '{source_video_path}'")
         print("Please ensure the video file exists at the specified path.")
     else:
-        app = SermonSplitterApp(source_path=source_video_path)
+        app = SermonPipeline(source_path=source_video_path)
         # Example of how to call the refactored run method
         num_clips = 1
         clips_data = [{"start_time": "00:00:10", "end_time": "00:00:30"}]
